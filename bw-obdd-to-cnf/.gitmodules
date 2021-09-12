@@ -1,0 +1,6 @@
+[submodule "BNC_SDD"]
+	path = BNC_SDD
+	url = ./other-software/BNC_SDD
+[submodule "bn-to-cnf"]
+	path = bn-to-cnf
+	url = ./other-software/bn-to-cnf/

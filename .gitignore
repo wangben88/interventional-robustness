@@ -1,0 +1,11 @@
+bw-obdd-to-cnf/BNC_SDD
+*.cnf
+*.lmap
+*.odd
+*.nnf
+*.ac
+*.net
+bw-obdd-to-cnf/cmake-build-debug
+bw-obdd-to-cnf/cmake-build-release
+constrained-ordering/cmake-build-debug
+bn-to-cnf/cmake-build-debug
