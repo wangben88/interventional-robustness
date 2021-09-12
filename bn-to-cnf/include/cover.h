@@ -81,6 +81,7 @@ class cover<T,0> {
         cover& xor_assign(cover&, const unsigned int);
 
     private:
+        bool compat_dummy;
         T elements[];
 };
 

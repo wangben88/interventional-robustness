@@ -2,7 +2,8 @@
 // NOTE: EXCEPTIONS NOT HANDLED
 #include <stdio.h>
 #include <string>
-#include "getopt.h"
+//#include "../build/getopt.h"
+#include <unistd.h>
 #include <ctype.h>
 #include "parser.h"
 #include "bayesnet.h"

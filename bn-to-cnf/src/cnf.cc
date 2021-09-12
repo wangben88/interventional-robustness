@@ -14,7 +14,8 @@
 #include <math.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "getopt.h"
+//#include "../build/getopt.h"
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 
