@@ -9,4 +9,4 @@ bw-obdd-to-cnf/cmake-build-debug
 bw-obdd-to-cnf/cmake-build-release
 constrained-ordering/cmake-build-debug
 bn-to-cnf/cmake-build-debug
-*.idea*
+.idea
