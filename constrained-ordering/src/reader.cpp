@@ -15,9 +15,6 @@ std::map <std::string, std::vector<std::string> > readConstraints(std::string in
 
     std::string line;
 
-    // Note that we are going to use dt_method 2, since that follows the heuristic ordering
-    // thus, since we are not performing a reversal, we need the interveneable nodes to
-    // come BEFORE its context in the ordering
     while (std::getline(fin, line)) {
         std::istringstream iss(line);
         std::string nodeName; iss >> nodeName;

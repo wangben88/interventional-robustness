@@ -1,15 +1,16 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <getopt.h>
+#include <unistd.h>
 #include <map>
 #include <vector>
 #include "utils.h"
 #include "graphModel.h"
 #include "reader.h"
+#include <algorithm>
 
 void help(){
-    std::cerr << "\nUsage:\n   ./bw_obdd_to_cnf -i <filename> \n\n";
+    std::cerr << "\nUsage:\n   ./constrained_ordering -i <filename> \n\n";
     std::cerr << "   Options:\n";
     std::cerr << "      -i <filename>: Input (.net file)\n";
     std::cerr << "      -c <filename>: Constraint file (.txt)\n";
@@ -26,7 +27,6 @@ int main(int argc, char **argv) {
     std::string constraintFile;
     std::string outFile;
     std::string outConstraintFile;
-    int sinks = 2; // default 2 sinks
 
     while ((c = getopt(argc, argv, "i:c:o:m:")) != -1) {
         switch (c) {
@@ -100,7 +100,11 @@ int main(int argc, char **argv) {
 
     std::ofstream fout(outFile);
 
-    // we are reversing in order to then use dt_method 3 (so that classifier nodes are also in the right place)
+    // getOrdering enforces constraints that ensure that nodes come before their parents in the ordering. We reverse
+    // to get an ordering where parents come before nodes.
+    // (technical note: this is not equivalent to just writing getOrdering/the constraints so that parents come before
+    // nodes, without reversing, because the heuristic would be different. we do it in this way because it uses the
+    // heuristic in the correct way, for the compilation downstream).
     std::reverse(ordering.begin(), ordering.end());
     for (auto str: ordering) {
         fout << str << std::endl;

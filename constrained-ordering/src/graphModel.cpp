@@ -8,7 +8,7 @@
 #include <algorithm>
 
 GraphModel::GraphModel(const GraphModel &g) {
-    this->adjMatrix = g.adjMatrix;
+    this->adjMatrix = g.adjMatrix; // deep copy
     this->nameToIdx = g.nameToIdx;
     this->idxToName = g.idxToName;
 }
@@ -42,7 +42,7 @@ void GraphModel::dropDirection() {
 
 GraphModel GraphModel::moralize() {
     GraphModel moralizedGraph(*this);
-    std::cout << this->adjMatrix.size() << std::endl;
+    std::cout << this->adjMatrix[1][2] << " " << this->adjMatrix[2][1] << std::endl;
     for (int destIdx = 0; destIdx < adjMatrix[0].size(); destIdx++) {
         std::vector<int> parIdxs;
         for (int candParIdx = 0; candParIdx < adjMatrix.size(); candParIdx++) {
@@ -65,29 +65,24 @@ GraphModel GraphModel::moralize() {
 }
 
 std::vector<int> GraphModel::getOrdering(GraphModel::Heuristic h, GraphModel::Constraint c,
-                                                 std::map<int, std::vector<int>> constraintMap,
-                                                 std::vector<int> restrictToIdxs) {
+                                                 std::map<int, std::vector<int>> constraintMap)
+                                                 {
+    // This function gradually constructs an ordering using the constrained MinFill heuristic. It proceeds by
+    // gradually adding nodes to the ordering while maintaining an undirected graph which is used to compute the
+    // heuristic at each step.
 
-    std::ofstream fout("heuristicScores2.txt");
-
-    std::vector<std::vector<bool> > inducedAdjMatrix = adjMatrix;
-    std::set<int> remainingNodeIdxs;
-    std::vector<int> ordering;
+    std::vector<std::vector<bool> > inducedAdjMatrix = adjMatrix; // induced graph used to compute heuristic
+    std::set<int> remainingNodeIdxs; // set of nodes left to add to the ordering
+    std::vector<int> ordering; // current ordering
     int treewidth = -1;
-    if (!restrictToIdxs.empty()) {
-        remainingNodeIdxs = std::set<int> (restrictToIdxs.begin(), restrictToIdxs.end());
-    }
-    else {
-        for (int idx = 0; idx < adjMatrix.size(); idx++) {
-            remainingNodeIdxs.insert(idx);
-        }
+
+    for (int idx = 0; idx < adjMatrix.size(); idx++) {
+        remainingNodeIdxs.insert(idx);
     }
 
     while (!remainingNodeIdxs.empty()) {
-        std::vector<int> scores = calcHeuristic(h, remainingNodeIdxs, inducedAdjMatrix, fout);
+        std::vector<int> scores = calcHeuristic(h, remainingNodeIdxs, inducedAdjMatrix);
 
-        //std::vector<int> indices(remainingNodeIdxs.size());
-        //std::iota(indices.begin(), indices.end(), 0);
         std::vector<int> remainingNodeIdxsVec(remainingNodeIdxs.size());
         std::copy(remainingNodeIdxs.begin(), remainingNodeIdxs.end(), remainingNodeIdxsVec.begin());
         auto comparator = [&scores](int a, int b){ return scores[a] < scores[b]; };
@@ -97,9 +92,6 @@ std::vector<int> GraphModel::getOrdering(GraphModel::Heuristic h, GraphModel::Co
         int removedIdx = -1;
         for (auto nodeIdx: remainingNodeIdxsVec) {
             if (canRemove(c, constraintMap, nodeIdx, remainingNodeIdxs)) {
-                //std::cout << idxToName[nodeIdx] << std::endl;
-                //std::cout << scores[nodeIdx] << std::endl;
-                //std::cout << scores[nameToIdx["DrivHist"]] << std::endl;
                 int connect = 0;
                 for (int otherIdx = 0; otherIdx < inducedAdjMatrix.size(); otherIdx++) {
                     if (inducedAdjMatrix[nodeIdx][otherIdx]) {
@@ -107,9 +99,6 @@ std::vector<int> GraphModel::getOrdering(GraphModel::Heuristic h, GraphModel::Co
                     }
                 }
                 treewidth = (connect > treewidth)? connect : treewidth;
-                fout << "NUM: ";
-                    fout << nodeIdx << " ";
-                fout << connect << std::endl;
 
                 removeNode(nodeIdx, remainingNodeIdxs, inducedAdjMatrix);
                 remainingNodeIdxs.erase(nodeIdx);
@@ -124,17 +113,13 @@ std::vector<int> GraphModel::getOrdering(GraphModel::Heuristic h, GraphModel::Co
         if (!removed) {
             throw std::logic_error("STUCK: no nodes can be ordered next");
         }
-        std::cout << remainingNodeIdxs.size() << std::endl;
     }
-    fout << "TREEWIDTH: " << treewidth << std::endl;
-    fout.close();
     return ordering;
 }
 
 std::vector<std::string> GraphModel::getOrdering(GraphModel::Heuristic h, GraphModel::Constraint c,
-                                                 std::map<std::string, std::vector<std::string>> constraintMap,
-                                                 std::vector<int> restrictToIdxs) {
-    std::vector<int> orderingInt = this->getOrdering(h, c, this->constraintMapToInt(constraintMap), restrictToIdxs);
+                                                 std::map<std::string, std::vector<std::string>> constraintMap) {
+    std::vector<int> orderingInt = this->getOrdering(h, c, this->constraintMapToInt(constraintMap));
 
     std::vector<std::string> orderingStr(orderingInt.size());
 
@@ -194,24 +179,16 @@ void GraphModel::parseNETLine(std::string line) {
 }
 
 std::vector<int> GraphModel::calcHeuristic(GraphModel::Heuristic h, const std::set<int> &remainingNodeIdxs,
-                                           const std::vector<std::vector<bool>> &inducedAdjMatrix,
-                                           std::ofstream& fout) {
+                                           const std::vector<std::vector<bool>> &inducedAdjMatrix) {
     std::vector<int> scores(inducedAdjMatrix.size());
     if (h == Heuristic::MIN_FILL) {
         for (int nodeIdx: remainingNodeIdxs) {
-            //fout << nodeIdx << std::endl;
             std::vector<int> neighbourIdxs;
-            // check all other nodes, not just remainingNodeIdxs since
-            // we care about those not contained in restrictToIdxs
             for (int otherIdx = 0; otherIdx < inducedAdjMatrix.size(); otherIdx++) {
                 if (inducedAdjMatrix[nodeIdx][otherIdx]) {
                     neighbourIdxs.push_back(otherIdx);
-                    //fout << otherIdx << " ";
                 }
-
-
             }
-            //fout << std::endl;
 
             int fillCount = 0;
             for (int i = 0; i < neighbourIdxs.size(); i++) {
@@ -221,15 +198,10 @@ std::vector<int> GraphModel::calcHeuristic(GraphModel::Heuristic h, const std::s
                     }
                 }
             }
-            //std::cout << idxToName[nodeIdx] << " " << fillCount << std::endl;
             scores[nodeIdx] = fillCount;
         }
 
     }
-    //for (auto score: scores) {
-    //    fout << score << " ";
-    //}
-    //fout << std::endl;
     return scores;
 }
 
@@ -249,8 +221,6 @@ bool GraphModel::canRemove(GraphModel::Constraint c, std::map<int, std::vector<i
 void GraphModel::removeNode(int nodeIdx, const std::set<int> &remainingNodeIdxs,
                             std::vector<std::vector<bool>> &inducedAdjMatrix) {
     std::vector<int> neighbourIdxs;
-    // NOTE: This next for loop was previously missing as a bug, so I didn't
-    // remove removed nodes from being counted.
     for (int otherIdx = 0; otherIdx < inducedAdjMatrix.size(); otherIdx++) {
         if (inducedAdjMatrix[nodeIdx][otherIdx]) {
             neighbourIdxs.push_back(otherIdx);
