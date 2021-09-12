@@ -1,8 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-//#include <unistd.h>
-#include <getopt.h>
+#include <unistd.h>
 #include "utils.h"
 #include "parser.h"
 #include "graphModel.h"
