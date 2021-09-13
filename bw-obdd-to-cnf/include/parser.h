@@ -1,8 +1,8 @@
 #ifndef BW_OBDD_TO_CNF_PARSER_H
 #define BW_OBDD_TO_CNF_PARSER_H
 
-#include "logicNode.h"
-#include "literalMap.h"
+#include <logicNode.h>
+#include <string>
 
 /*
  * Each ODD node has an index, which is the index given to them by the .odd file. In the case of sinks S0, S1, etc.
@@ -18,9 +18,5 @@
  */
 
 Odd loadOdd(std::string infile, int numSinks);
-
-// If no ordering given, follow the default ordering in the CNF file.
-std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::string orderingfile = "", std::string constraintfile = "");
-
 
 #endif //BW_OBDD_TO_CNF_PARSER_H

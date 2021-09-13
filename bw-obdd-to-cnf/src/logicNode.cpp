@@ -411,21 +411,21 @@ void Cnf::addConjunction(long long int parentIndex, std::vector<long long int> c
     }
 }
 
-GraphModel Cnf::toGraph() {
-    std::vector<std::vector<bool> > adjMatrix = std::vector<std::vector<bool> > (this->numCnfVars, std::vector<bool>(this->numCnfVars));
-    for (auto clause: this->clauses) {
-        std::vector<std::pair<long long, bool> > literals = clause.getLiterals();
-        for (int i = 0; i < literals.size(); i++) {
-            // node is not connected to itself
-            for (int j = i + 1; j < literals.size(); j++) {
-                adjMatrix[literals[i].first][literals[j].first] = true;
-                adjMatrix[literals[j].first][literals[i].first] = true;
-            }
-        }
-    }
-
-    return GraphModel(adjMatrix);
-}
+//GraphModel Cnf::toGraph() {
+//    std::vector<std::vector<bool> > adjMatrix = std::vector<std::vector<bool> > (this->numCnfVars, std::vector<bool>(this->numCnfVars));
+//    for (auto clause: this->clauses) {
+//        std::vector<std::pair<long long, bool> > literals = clause.getLiterals();
+//        for (int i = 0; i < literals.size(); i++) {
+//            // node is not connected to itself
+//            for (int j = i + 1; j < literals.size(); j++) {
+//                adjMatrix[literals[i].first][literals[j].first] = true;
+//                adjMatrix[literals[j].first][literals[i].first] = true;
+//            }
+//        }
+//    }
+//
+//    return GraphModel(adjMatrix);
+//}
 
 std::map<int, std::vector<int> >
 Cnf::constraintsToCnfConstraints(std::map<std::string, std::vector<std::string>> constraintMap) {
