@@ -90,6 +90,8 @@ int main(int argc, char **argv) {
     GraphModel bn;
     bn.readNET(netFile);
 
+    // Add all topological constraints (i.e. involving node and its parents in the Bayesian network). While this is
+    // not strictly necessary, it is usually a good idea to enforce, unless the compilation is too slow.
     constraints = bn.addTopologicalConstraints(constraints);
 
     writeConstraints(outConstraintFile, constraints);
