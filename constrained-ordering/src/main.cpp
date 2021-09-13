@@ -108,6 +108,7 @@ int main(int argc, char **argv) {
     // nodes, without reversing, because the heuristic would be different. we do it in this way because it uses the
     // heuristic in the correct way, for the compilation downstream).
     std::reverse(ordering.begin(), ordering.end());
+    fout << ordering.size() << std::endl;
     for (auto str: ordering) {
         fout << str << std::endl;
     }

@@ -29,8 +29,9 @@ Each entry represents a node in the network, and is specified using the node nam
 the .net file. This file specifies the constraints (p_1, n), ..., (p_k, n). As the naming suggests, 
 in a typical use case p_1, ..., p_k will be the parents of n in the Bayesian network. 
 
-3. **Ordering file** (.txt): Each line contains a single variable name, with the file as a whole 
-containing a complete ordering of all variables/nodes in the Bayesian network .net file.
+3. **Ordering file** (.txt): The first line contains the number of variables. Each subsequent line
+   contains a single variable name, with the file as a whole containing a complete ordering 
+   of all variables/nodes in the Bayesian network .net file.
 
 ## Operation
 
