@@ -1,0 +1,12 @@
+../../output/combined.ac
+../../output/combined.lmap
+2
+MedCost 1 2 3
+Sink 0
+6
+SocioEcon
+RiskAversion
+Theft
+Mileage
+MakeModel
+Cushioning

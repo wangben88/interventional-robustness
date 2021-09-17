@@ -1,0 +1,9 @@
+../../output/combined.ac
+../../output/combined.lmap
+2
+BirthAsphyxia 0
+Sink 1
+3
+ChestXray
+Sick
+Grunting

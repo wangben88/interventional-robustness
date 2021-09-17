@@ -1,0 +1,8 @@
+../../output/combined.ac
+../../output/combined.lmap
+2
+PTROFFLINE 0
+Sink 1
+2
+NetOK
+NetPrint

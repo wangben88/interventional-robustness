@@ -35,7 +35,8 @@ performance subject to required ordering constraints.
 5. **bounding**: Given a compiled arithmetic circuit (AC), computes an upper bound on the interventional robustness.
 Based upon the AC evaluator implemented in Ace: http://reasoning.cs.ucla.edu/ace/
    
-There is also an **examples** directory containing example BNs and ODDs.
+There is also an **examples** directory containing example BNs and ODDs, as well as some example configuration files
+(see below).
 
 Roughly speaking, the pipeline is as follows (much of this is automated by a shell script):
 

@@ -1,0 +1,13 @@
+../../output/combined.ac
+../../output/combined.lmap
+2
+Steatosis 1
+Sink 0
+7
+alcoholism
+hepatomegaly
+alcohol
+itching
+fatigue
+consciousness
+hospital
