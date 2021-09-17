@@ -33,6 +33,7 @@ compiler for Bayesian network classifiers @ https://github.com/AndyShih12/BNC_SD
 performance subject to required ordering constraints.
    
 5. **bounding**: Given a compiled arithmetic circuit (AC), computes an upper bound on the interventional robustness.
+Based upon the AC evaluator implemented in Ace: http://reasoning.cs.ucla.edu/ace/
 
 Roughly speaking, the pipeline is as follows (much of this is automated by a shell script):
 

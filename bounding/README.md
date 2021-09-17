@@ -9,6 +9,8 @@ Requires the following to be specified as input:
 2. The evidence e, which represents the probability of interest;
 3. The intervention set W, representing the variables which can be intervened on
 
+This implementation is an adapted version of the AC evaluator included in Ace: http://reasoning.cs.ucla.edu/ace/
+
 ## Installation
 
 Enter the *bin* subdirectory and run the following commands:
