@@ -20,7 +20,7 @@ can be converted to CNF, cf. Related Work section in paper).*
 *Implementation Note: Currently only upper bounds available; lower bounds will be added very soon.*
 
 ## Structure
-This repository consists of 5 directories, which we describe briefly below:
+This repository consists of 5 main directories, which we describe briefly below:
 1. **bn-to-cnf**: Converts Bayesian networks specified in HUGIN.net format to CNF. Implementation from
    https://github.com/gisodal/bn-to-cnf
    
@@ -34,6 +34,8 @@ performance subject to required ordering constraints.
    
 5. **bounding**: Given a compiled arithmetic circuit (AC), computes an upper bound on the interventional robustness.
 Based upon the AC evaluator implemented in Ace: http://reasoning.cs.ucla.edu/ace/
+   
+There is also an **examples** directory containing example BNs and ODDs.
 
 Roughly speaking, the pipeline is as follows (much of this is automated by a shell script):
 
@@ -77,8 +79,8 @@ Follow the pipeline above. The first 4 steps can be completed using the bash scr
     > bash obtain_joint_cnf.sh -n bn.net -d df.odd -m constraints.txt -o output -t
 
 where *bn.net* is the Bayesian network file, *df.odd* the Decision function file, *constraints.txt* the initial
-constraints file, and *output* the directory in which to output the *.cnf* and *.lmap* file. The output files will be 
-named *combined.cnf* and *combined.lmap*.
+constraints file, and *output* the directory in which to output the *.cnf* and *.lmap* file (the output directory
+must already exist). The output files will be named *combined.cnf* and *combined.lmap*.
 
 For the 5th step, run the c2d compilation as follows (the -dt_method 3 option is crucial):
       
