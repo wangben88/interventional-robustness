@@ -156,9 +156,11 @@ private:
 
 class Cnf {
 public:
-    Cnf(long long numCnfVars);
+    Cnf();
 
     void write(std::string outfile);;
+
+    void read(std::string infile);;
 
     void addClause(cnfClause cl);
 
@@ -181,6 +183,10 @@ public:
 
     long long getNumCnfVars() {
         return numCnfVars;
+    }
+
+    void setNumCnfVars(long long numVars) {
+        this->numCnfVars = numVars;
     }
 
     ///////////////////

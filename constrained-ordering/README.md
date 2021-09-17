@@ -46,7 +46,8 @@ verify:
   > W C_1 ... C_k
   
 Now run the following command:
-> ./constrained-ordering -i bn1.net -c constraints_bn1.txt -o ordering_bn1.txt -m modconstraints_bn1.txt
+
+    > ./constrained-ordering -i bn1.net -c constraints_bn1.txt -o ordering_bn1.txt -m modconstraints_bn1.txt
 
 Here bn1.net is your input Bayesian network, constraints_bn1.txt the input constraint file, 
 ordering_bn1.txt the file to write the outputted ordering to, and modconstraints_bn1.txt the file to

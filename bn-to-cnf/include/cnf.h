@@ -99,6 +99,7 @@ class cnf {
 
         // int read(char*);
         int write(const char *extra = NULL);
+        int write_with_location(const char* outfile);
         void stats(FILE *file = stdout, expression_t *e = NULL);
 
         int encode(bayesnet *bn);

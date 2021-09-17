@@ -10,7 +10,7 @@
 #include <algorithm>
 
 void help(){
-    std::cerr << "\nUsage:\n   ./constrained_ordering -i <filename> \n\n";
+    std::cerr << "\nUsage:\n   ./constrained_ordering -i bn.net -c constraints.txt -o ordering.txt -m modconstraints.txt \n\n";
     std::cerr << "   Options:\n";
     std::cerr << "      -i <filename>: Input (.net file)\n";
     std::cerr << "      -c <filename>: Constraint file (.txt)\n";
@@ -81,7 +81,6 @@ int main(int argc, char **argv) {
 
     if (netFile.empty()) {
         help();
-        std::cerr << "Specify input file with -i <filename>\n";
         return 1;
     }
 

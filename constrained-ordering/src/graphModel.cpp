@@ -86,7 +86,7 @@ std::vector<int> GraphModel::getOrdering(GraphModel::Heuristic h, GraphModel::Co
         std::vector<int> remainingNodeIdxsVec(remainingNodeIdxs.size());
         std::copy(remainingNodeIdxs.begin(), remainingNodeIdxs.end(), remainingNodeIdxsVec.begin());
         auto comparator = [&scores](int a, int b){ return scores[a] < scores[b]; };
-        std::sort(remainingNodeIdxsVec.begin(), remainingNodeIdxsVec.end(), comparator);
+        std::stable_sort(remainingNodeIdxsVec.begin(), remainingNodeIdxsVec.end(), comparator);
 
         bool removed = false;
         int removedIdx = -1;

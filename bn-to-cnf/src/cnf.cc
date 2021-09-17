@@ -447,6 +447,34 @@ int cnf::write(const char *extra){
     return 0;
 }
 
+int cnf::write_with_location(const char* outfile){
+    string prefix = outfile;
+    size_t found = prefix.find_last_of(".");
+    prefix = prefix.substr(0,found);
+    string name = prefix;
+    name += ".cnf";
+
+    if(write(name.c_str(),-1) == 0)
+        printf("\nDIMACS CNF written to: %s\n\n", name.c_str());
+    else {
+        return 1;
+        printf("Could not write to: %s\n\n", name.c_str());
+    }
+
+    if(exprs.size() > 0 && OPT_PARTITION) {
+        for(unsigned int v = 0; v < exprs.size(); v++){
+            name = prefix + ".";
+            name += "." + to_string(v) + ".cnf";
+            if(write(name.c_str(), v) != 0){
+                printf("Could not write to: %s\n\n", name.c_str());
+                return 1;
+            }
+        }
+        printf("Partitioned DIMACS CNF written to: %s.*.cnf\n\n", prefix.c_str());
+    }
+    return 0;
+}
+
 void cnf::stats(FILE *file, expression_t* e){
     if(!e)
         e = &expr;

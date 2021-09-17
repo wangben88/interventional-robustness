@@ -42,10 +42,11 @@ int main(int argc, char **argv){
     int c;
     char infile[100] = {0};
     char outfile[100];
+    char savefile [1000];
     char ext[20] = {0};
 
     bool write = false, stats = false;
-    while ((c = getopt(argc, argv, "i:adecswbhpql:")) != -1){
+    while ((c = getopt(argc, argv, "i:adecsw:bhpql:")) != -1){
         switch (c){
             case 'p': // partitioned
                 f.set_optimization(cnf::opt_t::PARTITION);
@@ -78,6 +79,7 @@ int main(int argc, char **argv){
                 break;
             case 'w':
                 write = true;
+                strcpy(savefile,optarg);
                 break;
             case 's':
                 stats = true;
@@ -134,7 +136,8 @@ int main(int argc, char **argv){
 
     f.encode(bn);
     if(write)
-        f.write();
+        //f.write();
+        f.write_with_location(savefile);
 
     if(stats)
         f.stats();

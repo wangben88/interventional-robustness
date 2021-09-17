@@ -180,11 +180,11 @@ void Nnf::loadFromOdd(const Odd &diagram) {
     std::map<std::string, bool> srcVarSeen; // true if we have already encountered an ODD node for that srcVar
 
     //std::map<std::string, std::vector<long long> > srcVarNameValToIndicatorNodeIndex;
-    std::cout << oddNodes.size() << std::endl;
+    //std::cout << oddNodes.size() << std::endl;
     for (auto oddNode: oddNodes) {
-        std::cout << "FAIL" << std::endl;
+        //std::cout << "FAIL" << std::endl;
         if (oddNode.getType() == OddNode::SINK) {
-            std::cout << oddNode.getId() << std::endl;
+            //std::cout << oddNode.getId() << std::endl;
             oddIdToOrNodeIndex[oddNode.getId()] = this->getSize();
             this->addNode({}, NnfNode::LEAF, oddNode.getSrcVarName(), oddNode.getSinkNum());
         }
@@ -194,12 +194,12 @@ void Nnf::loadFromOdd(const Odd &diagram) {
             // Add conjunctions (and indicators):
             std::vector<long long> conjIndices;
             bool thisVarSeen = srcVarSeen[oddNode.getSrcVarName()]; // do we have the indicators for this variable
-            std::cout << oddNode.getCardinality() << std::endl;
+            //std::cout << oddNode.getCardinality() << std::endl;
             for (int chIndex = 0; chIndex < oddNode.getCardinality(); chIndex++) {
 
                 long long chNodeId = oddNode.getChild(chIndex);
 
-                std::cout << chNodeId << " ";
+                //std::cout << chNodeId << " ";
                 if (oddIdToOrNodeIndex.count(chNodeId) == 0) {
 
                     throw std::logic_error("Could not create NNF from ODD (ODD nodes are not in reverse topological order)");
@@ -223,7 +223,7 @@ void Nnf::loadFromOdd(const Odd &diagram) {
                 this->addNode({indNodeIndex, oddIdToOrNodeIndex[chNodeId]}, NnfNode::CONJ);
 
             }
-            std::cout << std::endl;
+            //std::cout << std::endl;
 
             // disjunction
             oddIdToOrNodeIndex[oddNode.getId()] = this->getSize();
@@ -283,8 +283,7 @@ std::vector<std::pair<long long, bool> > cnfClause::getLiterals() const {
     return literals;
 }
 
-Cnf::Cnf(long long int numCnfVars) {
-    this->numCnfVars = numCnfVars;
+Cnf::Cnf() {
 }
 
 void Cnf::write(std::string outfile) {
@@ -308,14 +307,70 @@ void Cnf::write(std::string outfile) {
     }
 }
 
+// IMPORTANT: ONLY WORKS WITH OBDD WRITTEN FORMAT!
+void Cnf::read(std::string infile) {
+    std::ifstream fin(infile);
+
+
+    std::string titleString;
+    std::getline(fin, titleString);
+    std::stringstream ss_t(titleString);
+    std::string dummy;
+    ss_t >> dummy; ss_t >> dummy; // p cnf
+
+    int numVars, numClauses;
+    ss_t >> numVars >> numClauses;
+    this->numCnfVars = numVars;
+
+    std::string clauseString;
+    for (int i = 0; i < numClauses; i++) {
+        std::getline(fin, clauseString);
+        std::stringstream ss_c(clauseString);
+        cnfClause clause;
+
+        std::string literalStr; long long literalInt;
+        while (ss_c >> literalStr) {
+            literalInt = std::stoi(literalStr);
+            if (literalInt != 0) {
+                bool positive = literalInt > 0;
+                long long idx = abs(literalInt) - 1;
+                clause.addLiteral(idx, positive);
+            }
+        }
+
+        this->addClause(clause);
+    }
+
+    this->srcVarNameValToIndicatorNodeIndex.clear(); // Clear the map if it already contains something
+    std::string commentString;
+    std::getline(fin, commentString); // c ====================
+    while (std::getline(fin, commentString)) {
+        std::string commentToken;
+        std::stringstream ss_m(commentString);
+        ss_m >> commentToken; // c
+
+        std::vector<long long> valToIndicator;
+        std::string varName, indicatorIdxStr; long long indicatorIdxInt;
+        ss_m >> varName;
+
+        this->srcVarNameValToIndicatorNodeIndex.insert({varName, std::vector<long long>()});
+
+        while (ss_m >> indicatorIdxStr) {
+            indicatorIdxInt = std::stoi(indicatorIdxStr);
+            this->srcVarNameValToIndicatorNodeIndex[varName].push_back(indicatorIdxInt - 1);
+        }
+    }
+}
+
 void Cnf::addClause(cnfClause cl) {
     clauses.push_back(cl);
 }
 
 void Cnf::encodeNNF(Nnf nnfDiagram) {
+    this->numCnfVars = nnfDiagram.getSize();
+
     std::vector<long long> sinkIndices; // where the sinks/prediction nodes are
     std::vector<NnfNode> nodes = nnfDiagram.getNodes();
-
 
     for (int idx = 0; idx < nodes.size(); idx++) {
         NnfNode node = nodes[idx];
@@ -352,7 +407,7 @@ void Cnf::encodeNNF(Nnf nnfDiagram) {
                 break;
 
         }
-        std::cout << "HI" << idx << std::endl;
+        //std::cout << "HI" << idx << std::endl;
     }
     addHeadlessXOR(sinkIndices);
 
@@ -411,21 +466,21 @@ void Cnf::addConjunction(long long int parentIndex, std::vector<long long int> c
     }
 }
 
-//GraphModel Cnf::toGraph() {
-//    std::vector<std::vector<bool> > adjMatrix = std::vector<std::vector<bool> > (this->numCnfVars, std::vector<bool>(this->numCnfVars));
-//    for (auto clause: this->clauses) {
-//        std::vector<std::pair<long long, bool> > literals = clause.getLiterals();
-//        for (int i = 0; i < literals.size(); i++) {
-//            // node is not connected to itself
-//            for (int j = i + 1; j < literals.size(); j++) {
-//                adjMatrix[literals[i].first][literals[j].first] = true;
-//                adjMatrix[literals[j].first][literals[i].first] = true;
-//            }
-//        }
-//    }
-//
-//    return GraphModel(adjMatrix);
-//}
+GraphModel Cnf::toGraph() {
+    std::vector<std::vector<bool> > adjMatrix = std::vector<std::vector<bool> > (this->numCnfVars, std::vector<bool>(this->numCnfVars));
+    for (auto clause: this->clauses) {
+        std::vector<std::pair<long long, bool> > literals = clause.getLiterals();
+        for (int i = 0; i < literals.size(); i++) {
+            // node is not connected to itself
+            for (int j = i + 1; j < literals.size(); j++) {
+                adjMatrix[literals[i].first][literals[j].first] = true;
+                adjMatrix[literals[j].first][literals[i].first] = true;
+            }
+        }
+    }
+
+    return GraphModel(adjMatrix);
+}
 
 std::map<int, std::vector<int> >
 Cnf::constraintsToCnfConstraints(std::map<std::string, std::vector<std::string>> constraintMap) {
@@ -514,7 +569,7 @@ void Cnf::encodeNNF2(Nnf nnfDiagram) {
                 break;
 
         }
-        std::cout << "HI" << idx << std::endl;
+        //std::cout << "HI" << idx << std::endl;
     }
     //addHeadlessXOR(sinkIndices);
 

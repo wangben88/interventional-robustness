@@ -5,12 +5,14 @@
 #include "utils.h"
 #include "parser.h"
 #include "logicNode.h"
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 void help(){
-    std::cerr << "\nUsage:\n   ./bw_obdd_to_cnf -i <filename> \n\n";
+    std::cerr << "\nUsage:\n   ./bw_obdd_to_cnf -i df.odd -o df.cnf \n\n";
     std::cerr << "   Options:\n";
     std::cerr << "      -i <filename>: Input (.odd file)\n";
-    std::cerr << "      -o <filename>: Output filename for CNF representation (.txt file)\n";
+    std::cerr << "      -o <filename>: Output filename for CNF representation (.cnf file)\n";
     std::cerr << "      -s <sinks>: Number of sinks (i.e. number of classifier outcomes), default 2\n";
     std::cerr << "      -h: Help\n";
 }
@@ -24,7 +26,7 @@ int main(int argc, char **argv){
     std::string constraintFile;
     int sinks = 2; // default 2 sinks
 
-    while ((c = getopt(argc, argv, "i:o:")) != -1){
+    while ((c = getopt(argc, argv, "i:m:c:o:")) != -1){
         switch (c){
             case 'i': // provide input
             {
@@ -40,6 +42,10 @@ int main(int argc, char **argv){
             {
                 outfile = optarg;
                 std::string ext = get_filename_ext(outfile.c_str());
+                if (ext != "cnf") {
+                    std::cerr << "Unknown file extension, a '*.cnf' file is required\n";
+                    return 1;
+                }
             }
                 break;
             case 's':
@@ -56,22 +62,17 @@ int main(int argc, char **argv){
 
     if (infile.empty()) {
         help();
-        std::cerr << "Specify input file with -i <filename>\n";
         return 1;
     }
     // Load Odd
 
     Odd diagram = loadOdd(infile, sinks);
-    std::cout << "READIN" << std::endl;
     auto srcVarNamesNumValues = diagram.getSrcVariableDetails();
     Nnf nnfdiag(diagram.getSrcVariableDetails());
     nnfdiag.loadFromOdd(diagram);
-    nnfdiag.dump();
-    Cnf form(nnfdiag.getSize());
+    Cnf form;
     form.encodeNNF(nnfdiag);
-    std::cout << "Classifier CNF numvars: " << form.getNumCnfVars() << std::endl;
     form.write(outfile);
-
 
     return 0;
 }

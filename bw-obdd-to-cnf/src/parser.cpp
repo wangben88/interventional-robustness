@@ -19,7 +19,6 @@ Odd loadOdd(std::string infile, int numSinks) {
     while (iss >> srcVarName) {
         srcVarNamesNumValues.push_back({srcVarName, 0});
     }
-    std::cout << "TIPTOP" << std::endl;
     // first pass through main file, to figure out how many different values each variable takes
     while (std::getline(fin, line)) {
 
@@ -62,7 +61,7 @@ Odd loadOdd(std::string infile, int numSinks) {
         std::vector<long long> childrenId;
         OddNode::NodeType type;
 
-        std::cout << iss.str() << std::endl;
+        //std::cout << iss.str() << std::endl;
         iss >> id;
         iss >> srcVarIndex;
         while (iss >> chString) {

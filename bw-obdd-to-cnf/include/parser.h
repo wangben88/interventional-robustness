@@ -19,4 +19,5 @@
 
 Odd loadOdd(std::string infile, int numSinks);
 
+
 #endif //BW_OBDD_TO_CNF_PARSER_H
