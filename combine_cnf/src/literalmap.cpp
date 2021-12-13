@@ -34,10 +34,6 @@ void Lmap::loadFromCnf(Cnf cnf, std::vector <std::string> srcVarOrdering, std::v
         }
     }
 
-    for (long long i  = 0; i < 61; i++) {
-        auto vart = acVarToIndicatorInfo[i];
-    }
-
     std::vector<cnfClause> clauses = cnf.getClauses();
     for (auto clause: clauses) {
         std::vector<std::pair<long long, bool> > literals = clause.getLiterals();
