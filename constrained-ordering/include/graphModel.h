@@ -43,13 +43,15 @@ public:
 
     // Wrapper for getOrdering which returns names rather than indexes
     std::vector<std::string> getOrdering(Heuristic h, Constraint c, std::map<std::string,
-                                         std::vector<std::string> > constraintMap);
+                                         std::vector<std::string> > constraintMap,
+                                         const std::vector<std::string>& priorities = std::vector<std::string>());
 
     // Returns an ordering of the variables (indexes) satisfying the constraints in constraintMap, by utilising the
     // heuristic h. Assumes the graph is undirected (i.e. from a Bayesian network, we have moralized the graph).
     // Input constraints are of the form <node> <parenti>, where the constraint stipulates that <node> must come
     // before <parenti>.
-    std::vector<int> getOrdering(Heuristic h, Constraint c, std::map<int, std::vector<int> > constraintMap);
+    std::vector<int> getOrdering(Heuristic h, Constraint c, std::map<int, std::vector<int> > constraintMap,
+                                 const std::vector<std::string>& priorities = std::vector<std::string>());
 
     // Adds topological constraints (i.e. node must appear before descendant in directed graph) to the constraints in
     // the parameter constraintMap

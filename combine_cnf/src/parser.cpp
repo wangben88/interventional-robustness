@@ -171,6 +171,9 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
 
     acVarToType = std::vector<Lmap::AcVarType> (numVars, Lmap::PARAMETER); // we will loop over the AC vars which are indicators later, to edit this
     acVarToWeight = std::vector<double> (numVars);
+    std::vector<std::string> acVarToPriority = std::vector<std::string> (numVars); // for each AC var, we assign a priority which breaks ties when deciding on ordering. This is meant
+    // primarily for ensuring that indicators for the same BN variable stay together. we use string comparison
+    // all parameters are given "" as default value as we don't need to specify tie breaks
 
     std::vector<cnfClause> clauses; // stores CNF clauses describing the Bayesian Network
 
@@ -278,6 +281,7 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
             if (indices[value] > maxIndicatorVarIdx) {
                 maxIndicatorVarIdx = indices[value];
             }
+            acVarToPriority[indices[value]] = srcVarName;
         }
         srcVarNameValToIndicatorNodeIndex[srcVarName] = indices;
     }
@@ -343,6 +347,8 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
     }
     combinedCnf.setSrcVarDetails(srcVarNameValToIndicatorNodeIndex);
 
+    acVarToPriority.resize(numVars); // new size, now that we have added the classifier vars to the Cnf
+
 
     // start reconstructing ordering
     GraphModel combinedCnfGraph = combinedCnf.toGraph();
@@ -368,7 +374,8 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
     //std::vector<int> restrictIndicatorsOnly(maxIndicatorVarIdx + 1);
     //std::iota(restrictIndicatorsOnly.begin(), restrictIndicatorsOnly.end(), 0);
 
-    std::vector<int> cnfOptimalOrdering = combinedCnfGraph.getOrdering(GraphModel::Heuristic::MIN_FILL, GraphModel::Constraint::PARTIAL_ORDER, combinedCnfConstraintMap);//, restrictIndicatorsOnly);
+    std::vector<int> cnfOptimalOrdering = combinedCnfGraph.getOrdering(GraphModel::Heuristic::MIN_FILL, GraphModel::Constraint::PARTIAL_ORDER, combinedCnfConstraintMap,
+                                                                       acVarToPriority);//, restrictIndicatorsOnly);
     // reverse for dt_method 3
 
     std::reverse(cnfOptimalOrdering.begin(), cnfOptimalOrdering.end());

@@ -65,7 +65,8 @@ GraphModel GraphModel::moralize() {
 }
 
 std::vector<int> GraphModel::getOrdering(GraphModel::Heuristic h, GraphModel::Constraint c,
-                                                 std::map<int, std::vector<int>> constraintMap)
+                                                 std::map<int, std::vector<int>> constraintMap,
+                                                 const std::vector<std::string>& priorities)
                                                  {
     // This function gradually constructs an ordering using the constrained MinFill heuristic. It proceeds by
     // gradually adding nodes to the ordering while maintaining an undirected graph which is used to compute the
@@ -85,8 +86,18 @@ std::vector<int> GraphModel::getOrdering(GraphModel::Heuristic h, GraphModel::Co
 
         std::vector<int> remainingNodeIdxsVec(remainingNodeIdxs.size());
         std::copy(remainingNodeIdxs.begin(), remainingNodeIdxs.end(), remainingNodeIdxsVec.begin());
-        auto comparator = [&scores](int a, int b){ return scores[a] < scores[b]; };
-        std::stable_sort(remainingNodeIdxsVec.begin(), remainingNodeIdxsVec.end(), comparator);
+        if (priorities.empty()) {
+            auto comparator = [&scores](int a, int b) { return scores[a] < scores[b]; };
+            std::stable_sort(remainingNodeIdxsVec.begin(), remainingNodeIdxsVec.end(), comparator);
+        }
+        else {
+            auto comparator = [&scores, &priorities, &remainingNodeIdxsVec](int a, int b){
+                return (scores[a] == scores[b])
+                       ? (priorities[a] < priorities[b])
+                       : (scores[a] < scores[b]);
+            };
+            std::stable_sort(remainingNodeIdxsVec.begin(), remainingNodeIdxsVec.end(), comparator);
+        }
 
         bool removed = false;
         int removedIdx = -1;
@@ -118,8 +129,10 @@ std::vector<int> GraphModel::getOrdering(GraphModel::Heuristic h, GraphModel::Co
 }
 
 std::vector<std::string> GraphModel::getOrdering(GraphModel::Heuristic h, GraphModel::Constraint c,
-                                                 std::map<std::string, std::vector<std::string>> constraintMap) {
-    std::vector<int> orderingInt = this->getOrdering(h, c, this->constraintMapToInt(constraintMap));
+                                                 std::map<std::string, std::vector<std::string>> constraintMap,
+                                                 const std::vector<std::string>& priorities) {
+    std::vector<int> orderingInt = this->getOrdering(h, c, this->constraintMapToInt(constraintMap),
+                                                     priorities);
 
     std::vector<std::string> orderingStr(orderingInt.size());
 
