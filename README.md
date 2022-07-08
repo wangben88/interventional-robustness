@@ -58,7 +58,7 @@ Roughly speaking, the pipeline is as follows (much of this is automated by a she
 ## Installation
 
 First, obtain the c2d compiler from http://reasoning.cs.ucla.edu/c2d/, which is required for this project. Note that 
-they provide a 32-bit binary, so will 
+they provide a 32-bit binary, which may not run on modern MacOS releases.
 
 Second, compile the code from all of the subdirectories. This can be done quickly using the shell script provided;
 otherwise follow the instructions in the README in each subdirectory.
