@@ -7,7 +7,7 @@ provides guarantees on the robustness of classifier performance under distributi
 This code can be used to quantitatively measure (verify) the robustness of classifiers/decision rules when faced
 with distribution shifts, specified by causal interventions. This is quantified via the *worst-case* performance 
 of the classifier on some metric/evidence **e**, e.g. false positive probability, *across a set of distributions*. In 
-particular, given a causal Bayesian network **N**, an "intervention set"**I** specifiying all potential distribution 
+particular, given a causal Bayesian network **N**, an "intervention set" **I** specifiying all potential distribution 
 shifts, and any classifier **F** whose behaviour is described logically using a CNF formula, it computes tight upper 
 and lower bounds on the worst case probability **IntRob**(**I**, **N**, **F**, **e**).
 
@@ -18,6 +18,8 @@ as the code relies on this pipeline. However in the future the code will be upda
 can be converted to CNF, cf. Related Work section in paper).*
 
 *Implementation Note: Currently only upper bounds available; lower bounds will be added very soon.*
+
+arXiv: https://arxiv.org/abs/2105.09108
 
 ## Structure
 This repository consists of 5 main directories, which we describe briefly below:
