@@ -21,9 +21,17 @@ Enter the *bin* subdirectory and run the following commands:
 
 The following file formats are used:
 
-1. **Configuration file** (.txt): The program takes as input a configuration file, with the following format. The first line specifies the location of the .ac file. The second line specifies the location of the .lmap file. The third line gives the number of variables **M** for which evidence is specified. Each of the following **M** lines contains a variable instantiation, consisting of the variable name, followed by any number of variable values, all separated by spaces (e.g. MedCost 0 1 3 specifies MedCost = 0 OR 1 OR 3). Then, the following line gives the number of variables **N** in the intervention set W. Each of the following **N** lines contains a variable name, enumerating the intervention set. 
+1. **Configuration file** (.txt): The program takes as input a configuration file, with the following format. The first line specifies the location of the .ac file. The second line specifies the location of the .lmap file. The third line gives the number of variables **M** for which evidence is specified. Each of the following **M** lines contains a variable instantiation, consisting of the variable name, followed by any number of variable values, all separated by spaces (e.g. MedCost 0 1 3 specifies MedCost = 0 OR 1 OR 3). Then, the following line gives the number of variables **N** in the intervention set W. Each of the following **N** lines contains a variable name, enumerating the intervention set. *Note that the variable name "Sink" refers to the output of the classifier.* So, for example, if "Accident" was the target variable and we wanted to assess the probability of false positives, under interventions on {DrivHist, Age}, then the file would look like:
 
-Note that the variable name "Sink" refers to the output of the classifier.
+ >*path_to_ac_file*\
+ *path_to_lmap_file*\
+ 2\
+ Accident 0\
+ Sink 1\
+ 2\
+ DrivHist\
+ Age
+
 2. **AC file** (.ac) This is output by c2d, and must be specified in the configuration file.
 3. **Literal Map file** (.lmap): This is output by c2d, and must be specified in the configuration file.
 
@@ -31,7 +39,7 @@ Note that the variable name "Sink" refers to the output of the classifier.
 
 Navigate to the *bin* subdirectory, and run the following:
 
-    > java UpperBound.java config.txt
+    > java ace.UpperBound config.txt
 
 where "config.txt" is the configuration file.
 
