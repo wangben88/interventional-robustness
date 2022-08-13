@@ -40,12 +40,12 @@ file. Note that the code automatically adds topological constraints; as a result
 specify the following in the constraint file, depending on the type of interventions you wish to
 verify:
 
-* **Parametric**: For parametric interventions, you can leave the constraint file blank.
+* **Parametric**: For parametric interventions, a constraint file is not needed and the option can be omitted below.
 * **Structural**: For structural interventions, for each intervenable value W and its context 
   C(W) = {C_1, ... C_k}, add a line to the constraint file:
   > W C_1 ... C_k
   
-Now run the following command:
+Now run the following command (the constraint option can be omitted, if no constraints need to be added):
 
     > ./constrained-ordering -i bn1.net -c constraints_bn1.txt -o ordering_bn1.txt -m modconstraints_bn1.txt
 

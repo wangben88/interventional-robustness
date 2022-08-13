@@ -69,7 +69,7 @@ otherwise follow the instructions in the README in each subdirectory.
 
 The following are required as input:
 1. **Bayesian Network** (.net): Represents **N**
-2. **Decision Function** (.odd): Represents **F**
+2. **Decision Function** (.odd): Represents **F**. This is optional if the user wishes just to analyze the Bayesian network model.
 3. **Initial Constraints File** (.txt): Represents **I**. This specifies ordering constraints (cf. Sec 4.2. of paper and the README in 
    the constrained-ordering subdirectory). For parametric intervention sets **I**, this can be left as an empty text
    file (as the code will automatically add topological constraints); for structural intervention sets, the appropriate 
@@ -77,13 +77,13 @@ The following are required as input:
    
 4. **Configuration File** (.txt): Represents **e**, **I**. See README in bounding subdirectory for more details.
 
-Follow the pipeline above. The first 4 steps can be completed using the bash script:
+Follow the pipeline above. Alternatively, the first 4 steps can be completed using the bash script:
 
     > bash obtain_joint_cnf.sh -n bn.net -d df.odd -m constraints.txt -o output -t
 
 where *bn.net* is the Bayesian network file, *df.odd* the Decision function file, *constraints.txt* the initial
 constraints file, and *output* the directory in which to output the *.cnf* and *.lmap* file (the output directory
-must already exist). The output files will be named *combined.cnf* and *combined.lmap*.
+must already exist). If you are analyzing just the Bayesian network and do not have a decision function, then omit the -d option. The output files will be named *combined.cnf* and *combined.lmap*.
 
 For the 5th step, run the c2d compilation as follows (the -dt_method 3 option is crucial):
       
