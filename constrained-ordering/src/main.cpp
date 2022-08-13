@@ -13,7 +13,7 @@ void help(){
     std::cerr << "\nUsage:\n   ./constrained_ordering -i bn.net -c constraints.txt -o ordering.txt -m modconstraints.txt \n\n";
     std::cerr << "   Options:\n";
     std::cerr << "      -i <filename>: Input (.net file)\n";
-    std::cerr << "      -c <filename>: Constraint file (.txt)\n";
+    std::cerr << "      -c <filename>: Constraint file (.txt) - optional\n";
     std::cerr << "      -o <filename>: Output filename for ordering (.txt)\n";
     std::cerr << "      -m <filename>: Output filename for modified constraints (.txt)\n";
     std::cerr << "      -h: Help\n";
@@ -84,7 +84,11 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    std::map<std::string, std::vector<std::string> > constraints = readConstraints(constraintFile);
+
+    std::map<std::string, std::vector<std::string> > constraints;
+    if (!constraintFile.empty()) {
+        constraints = readConstraints(constraintFile);
+    }
 
     GraphModel bn;
     bn.readNET(netFile);

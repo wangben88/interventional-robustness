@@ -1,5 +1,6 @@
 #!/bin/bash
 add_top=false
+constraint_file_specified=false
 classifier_specified=false
 while getopts "htn:d:m:o:" opt; do
   case ${opt} in
@@ -20,6 +21,7 @@ while getopts "htn:d:m:o:" opt; do
       classifier_specified=true
       df_file=$OPTARG;;
     m )
+      constraint_file_specified=true
       constraint_file=$OPTARG;;
     o )
       out_dir=$OPTARG;;
@@ -32,7 +34,12 @@ echo "Done"
 echo "Adjusting Constraints..."
 if [ "$add_top" = true ]
 then
-  constrained-ordering/cmake-build/constrained_ordering -i "$bn_file" -c "$constraint_file" -o "${out_dir}/ordering.txt" -m "${out_dir}/modconstraints.txt"
+  if [ "constraint_file_specified" = true ]
+  then
+    constrained-ordering/cmake-build/constrained_ordering -i "$bn_file" -c "$constraint_file" -o "${out_dir}/ordering.txt" -m "${out_dir}/modconstraints.txt"
+  else
+    constrained-ordering/cmake-build/constrained_ordering -i "$bn_file" -o "${out_dir}/ordering.txt" -m "${out_dir}/modconstraints.txt"
+  fi
 else
   touch "${out_dir}/modconstraints.txt"
 fi
