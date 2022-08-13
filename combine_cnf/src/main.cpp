@@ -5,15 +5,16 @@
 #include "utils.h"
 #include "parser.h"
 #include "logicNode.h"
+#include "buildCnf.h"
 
 void help(){
     std::cerr << "\nUsage:\n   ./"
                  "combine_cnf -c bn.cnf -d df.cnf -m constraints.txt -o combined \n\n";
     std::cerr << "   Options:\n";
     std::cerr << "      -c <filename>: CNF for Bayesian Network (.cnf file)\n";
-    std::cerr << "      -d <filename>: CNF for Decision Function (.cnf file)\n";
+    std::cerr << "      -d <filename>: CNF for Decision Function (.cnf file) - optional\n";
     std::cerr << "      -m <sinks>: Ordering Constraints (.txt file)\n";
-    std::cerr << "      -o <sinks>: Output filename for combined cnf + lmap file (.txt files)\n";
+    std::cerr << "      -o <sinks>: Output filename for combined cnf + lmap file\n";
     std::cerr << "      -h: Help\n";
 }
 
@@ -72,20 +73,24 @@ int main(int argc, char **argv){
     for (int index = optind; index < argc; index++)
         std::cout << "Non-option argument " << argv[index] << std::endl;
 
-    if (bnCnfFile.empty() || dfCnfFile.empty() || constraintFile.empty()) {
+    if (bnCnfFile.empty() || constraintFile.empty() || outFile.empty()) {
         help();
         std::cerr << "Missing required argument\n";
         return 1;
     }
 
+
     // Load Cnfs
 
-    Cnf dfCnf;
-    dfCnf.read(dfCnfFile);
+//    Cnf dfCnf;
+//    dfCnf.read(dfCnfFile);
 
 
 
-    std::pair<Cnf, Lmap> outputs = loadCnfSpecial(bnCnfFile, dfCnf, constraintFile, outFile);
+
+    std::pair<Cnf, Lmap> outputs = buildCombinedCnf(bnCnfFile, dfCnfFile, constraintFile, outFile);
+    //std::pair<Cnf, Lmap> outputs = loadCnfSpecial(bnCnfFile,dfCnf, constraintFile, outFile);
+
     outputs.first.write(outFile + ".cnf");
     //outputs.second.write(outFile + ".lmap"); // For some reason, printing here instead of inside loadCnfSpecial
                                                // stops the printing halfway

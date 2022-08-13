@@ -1,5 +1,6 @@
 #!/bin/bash
 add_top=false
+classifier_specified=false
 while getopts "htn:d:m:o:" opt; do
   case ${opt} in
     h )
@@ -16,6 +17,7 @@ while getopts "htn:d:m:o:" opt; do
     n )
       bn_file=$OPTARG;;
     d )
+      classifier_specified=true
       df_file=$OPTARG;;
     m )
       constraint_file=$OPTARG;;
@@ -35,9 +37,16 @@ else
   touch "${out_dir}/modconstraints.txt"
 fi
 echo "Done"
-echo "Converting Decision Function to CNF..."
-bw-obdd-to-cnf/cmake-build/bw_obdd_to_cnf -i "$df_file" -o "${out_dir}/df.cnf"
-echo "Done"
-echo "Combining BN and DF CNF..."
-combine_cnf/cmake-build/combine_cnf -c "${out_dir}/bn.cnf" -d "${out_dir}/df.cnf" -m "${out_dir}/modconstraints.txt" -o "${out_dir}/combined"
-echo "Done"
+if [ "$classifier_specified" = true ]
+then
+  echo "Converting Decision Function to CNF..."
+  bw-obdd-to-cnf/cmake-build/bw_obdd_to_cnf -i "$df_file" -o "${out_dir}/df.cnf"
+  echo "Done"
+  echo "Combining BN and DF CNF..."
+  combine_cnf/cmake-build/combine_cnf -c "${out_dir}/bn.cnf" -d "${out_dir}/df.cnf" -m "${out_dir}/modconstraints.txt" -o "${out_dir}/combined"
+  echo "Done"
+else
+  echo "Optimizing BN CNF (Decision Function not specified)..."
+  combine_cnf/cmake-build/combine_cnf -c "${out_dir}/bn.cnf" -m "${out_dir}/modconstraints.txt" -o "${out_dir}/combined"
+  echo "Done"
+fi

@@ -98,58 +98,48 @@ Odd loadOdd(std::string infile, int numSinks) {
 
 }
 
+
+
+
 // Given
-std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::string constraintfile, std::string outfileprefix) {
+std::pair<Cnf, Lmap> loadCnfSpecial(const std::string& bnCnfFile, Cnf classifierCnf, const std::string& constraintfile, const std::string& outfileprefix) {
 
-    std::map<std::string, std::vector<long long> > srcVarNameValToIndicatorNodeIndex; // contains CNF variable index for the indicator lambda_{X = x} for src variable name X and value x
-    std::vector<std::string> ordering; // according to orderingfile, the desired ordering of CNF indices for the source varaibles
+    //////////////////////////////////////////////////////////////////////////////////
+    // Step 0: Define and maintain relevant information for combined CNF
+    //////////////////////////////////////////////////////////////////////////////////
 
-    std::vector<Lmap::AcVarType> acVarToType;
-    std::vector<double> acVarToWeight;
-    // 0 -indexed, so 1 less than you see in the file
-    // previously, I hardcoded this: now it is read automatically
-    /*
-    srcVarNameValToIndicatorNodeIndex["Admit"] = {0, 1};
-    srcVarNameValToIndicatorNodeIndex["EntranceExam"] = {2, 3};
-    srcVarNameValToIndicatorNodeIndex["FirstTimeApplicant"] = {4, 5};
-    srcVarNameValToIndicatorNodeIndex["GPA"] = {6, 7};
-    srcVarNameValToIndicatorNodeIndex["WorkExperience"] = {8, 9};
-    */
-    /*
-    srcVarNameValToIndicatorNodeIndex["Age"] = {0, 1, 2};
-    srcVarNameValToIndicatorNodeIndex["BirthAsphyxia"] = {3, 4};
-    srcVarNameValToIndicatorNodeIndex["CO2"] = {5, 6, 7};
-    srcVarNameValToIndicatorNodeIndex["CO2Report"] = {8, 9};
-    srcVarNameValToIndicatorNodeIndex["CardiacMixing"] = {10, 11, 12, 13};
-    srcVarNameValToIndicatorNodeIndex["ChestXray"] = {14, 15, 16, 17, 18};
-    srcVarNameValToIndicatorNodeIndex["Disease"] = {19, 20, 21, 22, 23, 24};
-    srcVarNameValToIndicatorNodeIndex["DuctFlow"] = {25, 26, 27};
-    srcVarNameValToIndicatorNodeIndex["Grunting"] = {28, 29};
-    srcVarNameValToIndicatorNodeIndex["GruntingReport"] = {30, 31};
-    srcVarNameValToIndicatorNodeIndex["HypDistrib"] = {32, 33};
-    srcVarNameValToIndicatorNodeIndex["HypoxiaInO2"] = {34, 35, 36};
-    srcVarNameValToIndicatorNodeIndex["LVH"] = {37, 38};
-    srcVarNameValToIndicatorNodeIndex["LVHreport"] = {39, 40};
-    srcVarNameValToIndicatorNodeIndex["LowerBodyO2"] = {41, 42, 43};
-    srcVarNameValToIndicatorNodeIndex["LungFlow"] = {44, 45, 46};
-    srcVarNameValToIndicatorNodeIndex["LungParench"] = {47, 48, 49};
-    srcVarNameValToIndicatorNodeIndex["RUQO2"] = {50, 51, 52};
-    srcVarNameValToIndicatorNodeIndex["Sick"] = {53, 54};
-    srcVarNameValToIndicatorNodeIndex["XrayReport"] = {55, 56, 57, 58, 59};
-    */
+    // Local variables containing information ("metadata") about CNF variables
 
-    // Read CNF file
-    std::ifstream fin(infile);
+    std::map<std::string, std::vector<long long> > srcVarNameValToIndicatorNodeIndex; // Contains CNF variable index for the indicator lambda_{X = x} for src variable name X and value x
+    std::vector<std::string> ordering; // According to orderingfile, the desired ordering of CNF indices for the source variables
+
+    std::vector<Lmap::AcVarType> acVarToType; // Maps CNF index to type of variable (indicator, parameter, or classifier/intermediate)
+    std::vector<double> acVarToWeight; // Maps CNF index to weight
+    std::vector<std::string> acVarToPriority; // for each AC var, we assign a priority which breaks ties when deciding on ordering. This is meant
+    // primarily for ensuring that indicators for the same BN variable stay together. we use string comparison
+    // all parameters are given "" as default value as we don't need to specify tie breaks
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////
+    // Step 1: Read CNF file for Bayesian network (including metadata)
+    //////////////////////////////////////////////////////////////////////////////////
+
+    std::vector<cnfClause> bnClauses; // CNF clauses for the Bayesian network
+
+    std::ifstream fin(bnCnfFile);
 
     std::string line;
 
     std::string firstPart = "c";
     std::string secondPart;
 
-    long long numVars;
-    long long numClauses;
-    int numSrcVars;
+    long long numVars; // number of CNF variables
+    long long numClauses;  // number of bnClauses in the CNF
+    int numSrcVars; // number of source (i.e. Bayesian network) variables
 
+    // Read preamble of CNF file
     while (firstPart == "c") {
         std::getline(fin, line);
         std::istringstream iss(line);
@@ -161,7 +151,6 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
             iss >> numSrcVars;
         }
 
-
         // reached start of CNF
         if (firstPart == "p") {
             iss >> numVars;
@@ -171,13 +160,9 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
 
     acVarToType = std::vector<Lmap::AcVarType> (numVars, Lmap::PARAMETER); // we will loop over the AC vars which are indicators later, to edit this
     acVarToWeight = std::vector<double> (numVars);
-    std::vector<std::string> acVarToPriority = std::vector<std::string> (numVars); // for each AC var, we assign a priority which breaks ties when deciding on ordering. This is meant
-    // primarily for ensuring that indicators for the same BN variable stay together. we use string comparison
-    // all parameters are given "" as default value as we don't need to specify tie breaks
+    acVarToPriority = std::vector<std::string> (numVars);
 
-    std::vector<cnfClause> clauses; // stores CNF clauses describing the Bayesian Network
-
-    // Read in CNF clauses
+    // Read in CNF clauses for the Bayesian network
     for (int i = 0; i < numClauses; i++) {
         std::getline(fin, line);
         std::istringstream iss(line);
@@ -192,7 +177,7 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
             literal = positive ? (literal - 1) : (literal + 1);
             clause.addLiteral(abs(literal), positive);
         }
-        clauses.push_back(clause);
+        bnClauses.push_back(clause);
     }
 
     // Read weights
@@ -236,7 +221,6 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
     }
 
     // Read details about mapping from source variable names, to the variable indices in CNF
-
     while (std::getline(fin, line)) {
         std::istringstream iss(line);
         std::string part;
@@ -289,10 +273,19 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
     fin.close();
 
 
-    // Adjust classifier clauses
+    //////////////////////////////////////////////////////////////////////////////////
+    // Step 2: Adjust classifier CNF clauses
+    //////////////////////////////////////////////////////////////////////////////////
+
+    // The classifier CNF contains two types of variables, namely indicator variables (corresponding to values of
+    // variables in the Bayesian network), and intermediate variables.
+    // This step aligns the index assigned to each indicator variable to that in the Bayesian network CNF in the last
+    // step, while ensuring that the intermediate variables have indexes unique from any already assigned.
+
     std::vector<cnfClause> classifierClauses = classifierCnf.getClauses();
     std::map<std::string, std::vector<long long> > srcVarValToClassifierCnfIndex = classifierCnf.getSrcVarDetails();
 
+    // Add the sink, i.e. predictor node to the combined CNF records.
     srcVarNameValToIndicatorNodeIndex["Sink"] = std::vector<long long> (srcVarValToClassifierCnfIndex["Sink"].size());
 
     std::vector<long long> classToFullIdxMap(classifierCnf.getNumCnfVars(), -1); // classifier cnf index to full cnf index
@@ -336,10 +329,13 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
 
     numClauses += classifierClauses.size();
 
-    // Combine
+    //////////////////////////////////////////////////////////////////////////////////
+    // Step 3: Combine Bayesian network CNF and classifier CNF
+    //////////////////////////////////////////////////////////////////////////////////
+
     Cnf combinedCnf;
     combinedCnf.setNumCnfVars(numVars);
-    for (auto clause: clauses) {
+    for (auto clause: bnClauses) {
         combinedCnf.addClause(clause);
     }
     for (auto clause: classifierClauses) {
@@ -350,7 +346,14 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
     acVarToPriority.resize(numVars); // new size, now that we have added the classifier vars to the Cnf
 
 
-    // start reconstructing ordering
+    //////////////////////////////////////////////////////////////////////////////////
+    // Step 4: Construct optimal ordering for CNF variables
+    //////////////////////////////////////////////////////////////////////////////////
+
+    // Use the constrained min-fill heuristic to obtain the optimal elimination ordering for the CNF variables
+    // Then remap the indices of the CNF variables so that the the natural ordering of indices follows this elimination
+    // ordering.
+
     GraphModel combinedCnfGraph = combinedCnf.toGraph();
     std::map<std::string, std::vector<std::string> > constraintMap;
 
@@ -400,9 +403,8 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
         //std::cout << idxMap[4] << std::endl;
     }
 
-    // Fix ac var details
-    //------------------------------------------------
-    // change srcVarNameValToIndicatorNodeIndex according to new ordering
+    // Update "metadata"
+    // Change srcVarNameValToIndicatorNodeIndex according to new ordering
     for (auto& bnVar: srcVarNameValToIndicatorNodeIndex) {
         // Keeps "Sink" the same automatically
         for (auto &index: bnVar.second) {
@@ -416,7 +418,7 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
     }
     combinedCnf.setSrcVarDetails(srcVarNameValToIndicatorNodeIndex);
 
-    // Copy old versions temporarily
+    // Update mapping to variable type and weight
     std::vector<Lmap::AcVarType> oldAcVarToType = acVarToType;
     std::vector<double> oldAcVarToWeight = acVarToWeight;
     for (int idx = 0; idx < numVars; idx++) {
@@ -425,9 +427,10 @@ std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::
         acVarToWeight[idx] = oldAcVarToWeight[cnfOptimalOrdering.at(idx)];
     }
 
-    // find best ordering with constraints
 
-
+    //////////////////////////////////////////////////////////////////////////////////
+    // Step 5: Return the combined CNF (together with metadata in LMAP)
+    //////////////////////////////////////////////////////////////////////////////////
     Lmap lm(Lmap::ALWAYS_SUM, Lmap::NORMAL);
     lm.loadFromCnf(combinedCnf, ordering, acVarToType, acVarToWeight);
     lm.write(outfileprefix + ".lmap");

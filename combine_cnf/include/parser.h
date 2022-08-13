@@ -20,7 +20,7 @@
 Odd loadOdd(std::string infile, int numSinks);
 
 // If no ordering given, follow the default ordering in the CNF file.
-std::pair<Cnf, Lmap> loadCnfSpecial(std::string infile, Cnf classifierCnf, std::string constraintfile = "", std::string outfileprefix="out");
+std::pair<Cnf, Lmap> loadCnfSpecial(const std::string& bnCnfFile, Cnf classifierCnf, const std::string& constraintfile = "", const std::string& outfileprefix = "out");
 
 
 #endif //BW_OBDD_TO_CNF_PARSER_H
